@@ -19,7 +19,7 @@ def get_data(stocks, start, end):
     covMatrix = returns.cov()
     return meanReturns, covMatrix
 
-stockList = ['AAPL', 'MSFT', 'NVDA', 'AMZN', 'JPM', 'KO']
+stockList = ['AAPL', 'MSFT', 'NVDA', 'AMZN', 'JPM', 'KO'] #Stock tickers. Apple, Microsoft, NVidia, Amazon, JP Morgan Chase, Coca Cola
 stocks = [stock for stock in stockList]
 endDate = dt.datetime.now()
 startDate = endDate - dt.timedelta(days=300)
@@ -29,14 +29,16 @@ meanReturns, covMatrix = get_data(stocks, startDate, endDate)
 weights = np.full(len(meanReturns), 1 / len(meanReturns))
 
 covMatrix = covMatrix.loc[meanReturns.index, meanReturns.index]
-
+# random number generator using seed 42
 rng = np.random.default_rng(42)
 
+#creating matrixes with dimensions [numDays + 1 and the number of simulations. In this example, [253, 1000]
 portfolioPaths = np.zeros((numDays + 1, numSimulations))
-portfolioPaths[0, :] = initialInvestment
+portfolioPaths[0, :] = initialInvestment #
 
+#Simulate portfolio return
 for simulation in range(numSimulations):
-    dailyStockReturns = rng.multivariate_normal(
+    dailyStockReturns = rng.multivariate_normal( #Vectorising the mean and covariance for efficiency.
         mean=meanReturns.to_numpy(),
         cov=covMatrix.to_numpy(),
         size=numDays
@@ -45,7 +47,7 @@ for simulation in range(numSimulations):
     portfolioPaths[1:, simulation] = (
         initialInvestment * np.cumprod(1 + dailyPortfolioReturns)
     )
-
+#plot data using matplotlib
 plt.figure(figsize=(12, 6))
 plt.plot(portfolioPaths, alpha=0.1, linewidth=0.7)
 plt.axhline(
